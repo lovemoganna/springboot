@@ -37,7 +37,7 @@ Spring-annotation
     @Bean//通过注解声明一个Bean对象,相当于xml中的<Bean/>
     
 5.一个测试类
-```
+````
     写个main方法
    
     1.实例化一个Spring容器
@@ -63,7 +63,7 @@ Spring-annotation
     4.销毁容器
      context.destory(); 
       
- ```     
+ ````     
       
 ##2.读取外部的资源配置文件
 
@@ -73,7 +73,7 @@ Spring-annotation
 
 如下所示:
 
-```androiddatabinding
+````androiddatabinding
 @Configuration//声明该类是一个spring的配置,相当于xml文件
 @ComponentScan(backPackages="xxxx")//配置扫描包
 //多个属性的写法
@@ -92,11 +92,11 @@ public class SpringConfig{
     }
 
 }
-```   
+````   
 
 配置文件不存在:
 
 需要我们配置:
-```androiddatabinding
+````androiddatabinding
 @PropertySource(Value={"classpath:jdbc.properties"},ignoreResourceNotFound=true)
-```
+````

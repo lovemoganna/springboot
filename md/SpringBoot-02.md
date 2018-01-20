@@ -166,3 +166,103 @@ org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration
 
 ###7.自动配置静态资源
 
+####1.进入规则为/
+
+如果进入SpringMVC的规则为/时,SpringBoot的默认静态资源的路径为:
+spring.resources.static-locations=classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+
+
+application.properties中的配置
+````androiddatabinding
+#放置静态资源的目录
+spring.resources.static-locations=classpath:/public/
+````
+
+测试:
+
+````androiddatabinding
+/**
+     * 自定义消息转换器,
+     * 只要在有@Configuration的注解中添加消息转换器@Bean加入到Spring容器,就会被SpringBoot自动加入到容器中.
+     * @return StringHttpMessageConverter
+     */
+    @Bean
+    public StringHttpMessageConverter stringHttpMessageConverter(){
+        StringHttpMessageConverter converter =new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        return converter;
+    }
+    
+    //其实你不设置也没事,但是设置成ISO-8859-1就会出乱码了.
+    //原因就是SpringBoot就不会为我们自动配置消息转换器了.
+````
+
+对应的配置是:
+![](http://upload-images.jianshu.io/upload_images/7505161-b254dd58d90beb9b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+我们进入看看
+
+![](http://upload-images.jianshu.io/upload_images/7505161-a9e0c5528fda90bd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![](http://upload-images.jianshu.io/upload_images/7505161-4d8d70c53cc68fa8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+只有在条件注解满足的条件下springboot才会自动配置消息转换器.内部就是定义了一个StringHttpMessageConverter,并且定义了它的编码.
+
+###7.自定义拦截器
+
+````androiddatabinding
+/**
+ * 声明这是一个配置类
+ */
+@Configuration
+public class SpringBootWebTest extends WebMvcConfigurerAdapter {
+    /**
+     * 自定义拦截器
+     * @param registry
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        HandlerInterceptor handlerInterceptor = new HandlerInterceptor() {
+            @Override
+            public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+                System.out.println("自定义拦截器...........");
+                return true;
+            }
+
+            @Override
+            public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+
+            }
+
+            @Override
+            public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+
+            }
+        };
+        //把自定义的拦截器加入到拦截器的列表当中,并且制定进入拦截器的规则.
+        registry.addInterceptor(handlerInterceptor).addPathPatterns("/**");
+
+    }
+
+}
+
+````
+
+那么我们如何将这个拦截器和HelloApplication.java联合使用哪?
+
+所以我们需要再理一理思路.
+
+![](http://upload-images.jianshu.io/upload_images/7505161-63a00603c079fabb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+###.8自定义消息转换器的第二种方法
+
+```androiddatabinding
+//就是在拦截器中配置,启动就会生效了.
+//他这个消息转换器的配置的原理,就是你什么也不做,SpringBoot会默认为你配置一个,但是,你做出了配置之后,SpringBoot前的条件注解就会生效.就不会自动配置了.
+
+ /**
+     * 自定义消息转换器的第二种方法
+     */
+    public void messageConverters(List<HttpMessageConverter> httpMessageConverterList){
+        StringHttpMessageConverter converter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        httpMessageConverterList.add(converter);
+    }
+```
